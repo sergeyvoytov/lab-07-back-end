@@ -73,50 +73,46 @@ function Forecast(summary, time) {
   this.time = (new Date(time * 1000)).toDateString();
 }
 
+// function Event(event) {
 
-//////////////
+//     this.link = event.url;
+//     this.name = event.venue_name;
+//     this.event_date = event.start_time;
+//     this.description = event.description; 
+// }
 
+try {
+  app.get('/events', getEvents);
+  
+} catch (error) {
+  console.error('catch on weather ', error)
 
-
-app.get('/events', (req, res) => {
-  let eventURL = `http://api.eventful.com/json/events/search?location=${req.query.data.formatted_query}&app_key=${process.env.EVENT_API_KEY}`
-  superagent.get(eventURL).then(res => {
-
-    let events = JSON.parse(res.text);
-
-    let moreEvents = events.events.event;
-
-    let eventData = moreEvents.map(event => {
-
-      return new Event(event)
-
-    })
-
-    res.send(eventData);
-
-  })
-    .catch(error => {
-      console.error(error)
-    })
-});
-
-
-
-
-function Event(event) {
-
-  this.link = event.url;
-    this.name = event.venue_name;
-    this.event_date = event.start_time;
-    this.description = event.description; 
 }
 
-//////////////  
+function getEvents(req, res) {
+  console.log(req.query);
+  // go to eventful, get data and get it to look like this
+  superagent.get(`http://api.eventful.com/json/events/search?app_key=kcbDf9m2gZnd2bBR&keywords=sports&location=${req.query.data.formatted_query}&date=Future`).then(response => {
+    // console.log(JSON.parse(response.text).events.event[0]);
+    const firstEvent = JSON.parse(response.text).events.event[0];
+    const allEvents = JSON.parse(response.text).events.event;
 
+    const allData = allEvents.map(event => {
+      return {
+        'link': event.url,
+        'name': event.title,
+        'event_date': event.start_time,
+        'summary': event.description
+      };
+    });
+    console.log(allData);
 
+    res.send(allData);
+
+  });
+
+}
 
 app.listen(PORT, function () {
   console.log('starting!');
 });
-
-

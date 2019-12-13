@@ -49,7 +49,7 @@ function createDataFromAPI(request, response, query) {
     const formAddr = geoResponse.body.results[0].formatted_address;
     locationSubmitted = new Geolocation(query, formAddr, location);
     const sqlValue = [locationSubmitted.searchquery, locationSubmitted.formatted_query, locationSubmitted.latitude, locationSubmitted.longitude];
-    const SQL = `INSERT INTO cityLocation(
+    const SQL = `INSERT INTO location(
       searchQuery, formattedQuery, latitude, longitude
       ) VALUES (
         $1, $2, $3, $4

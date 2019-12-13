@@ -23,7 +23,7 @@ const DATABASE_URL = process.env.DATABASE_URL;
 let locationSubmitted;
 let query;
 
-const client = new pg.Client(`${DATABASE_URL}`);
+const client = new pg.Client(DATABASE_URL);
 client.on('error', error => console.error(error));
 client.connect();
 
@@ -42,17 +42,19 @@ function getLocationData(request, response) {
 }
 
 function createDataFromAPI(request, response, query) {
+
+
   superagent.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${GEOCODE_API_KEY}`).then(geoResponse => {
     const location = geoResponse.body.results[0].geometry.location;
     const formAddr = geoResponse.body.results[0].formatted_address;
-    locationSubmitted = new Geolocation(query, formAddr, location.lat, location.lng);
-    const sqlValu = [locationSubmitted.searchquery, locationSubmitted.formatted_query, locationSubmitted.latitude, locationSubmitted.longitude];
-    const SQL = `INSERT INTO cityLocation(
-      searchQuery, formattedQuery, latitude, longitude
-      ) VALUES (
-        $1, $2, $3, $4
-        )`;
-    client.query(SQL, sqlValu);
+    locationSubmitted = new Geolocation(query, formAddr, location);
+    // const sqlValue = [locationSubmitted.searchquery, locationSubmitted.formatted_query, locationSubmitted.latitude, locationSubmitted.longitude];
+    // const SQL = `INSERT INTO cityLocation(
+    //   searchQuery, formattedQuery, latitude, longitude
+    //   ) VALUES (
+    //     $1, $2, $3, $4
+    //     )`;
+    // client.query(SQL, sqlValue);
     response.send(locationSubmitted);
   })
 }

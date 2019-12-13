@@ -48,7 +48,7 @@ function createDataFromAPI(request, response, query) {
     const location = geoResponse.body.results[0].geometry.location;
     const formAddr = geoResponse.body.results[0].formatted_address;
     locationSubmitted = new Geolocation(query, formAddr, location);
-    const sqlValue = [locationSubmitted.searchquery, locationSubmitted.formatted_query, locationSubmitted.latitude, locationSubmitted.longitude];
+    const sqlValue = [locationSubmitted.search_query, locationSubmitted.formatted_query, locationSubmitted.latitude, locationSubmitted.longitude];
     const SQL = `INSERT INTO location(
       search_query, formatted_query, latitude, longitude
       ) VALUES (

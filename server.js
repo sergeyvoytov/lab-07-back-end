@@ -77,8 +77,10 @@ function getWeatherData(request, response) {
       return new Forecast(byDay.summary, byDay.time);
     })
     response.send(reply);
-  })
+  }).catch(error => {
+    console.error('catch on door handle', error)
 }
+  )}
 
 
 // FORECAST CONSTRUCTOR FUNCTION

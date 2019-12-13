@@ -14,13 +14,14 @@ let newLocation;
 app.get('/location', (req, res) => {
   // let query =request.query.data;
 
-  let googleURL = `https://maps.googleapis.com/maps/api/geocode/json?address=${req.query.data}&key=${process.env.GEOCODING_API_KEY}`
-  console.log(process.env.GEOCODING_API_KEY);
+  let googleURL = `https://maps.googleapis.com/maps/api/geocode/json?address=${req.query.data}&key=${process.env.GEOCODE_API_KEY}`
+  console.log(process.env.GEOCODE_API_KEY);
 
   superagent.get(googleURL).then(response => {
-    // console.log('body', response.body);
+     console.log('body', response.body);
 
     const location = response.body.results[0].geometry.location;
+    
     const formatedAddress = response.body.results[0].formatted_address;
     const searchQuery = response.body.results[0].address_components[0].long_name;
 

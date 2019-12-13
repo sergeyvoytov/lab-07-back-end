@@ -48,13 +48,13 @@ function createDataFromAPI(request, response, query) {
     const location = geoResponse.body.results[0].geometry.location;
     const formAddr = geoResponse.body.results[0].formatted_address;
     locationSubmitted = new Geolocation(query, formAddr, location);
-    // const sqlValue = [locationSubmitted.searchquery, locationSubmitted.formatted_query, locationSubmitted.latitude, locationSubmitted.longitude];
-    // const SQL = `INSERT INTO cityLocation(
-    //   searchQuery, formattedQuery, latitude, longitude
-    //   ) VALUES (
-    //     $1, $2, $3, $4
-    //     )`;
-    // client.query(SQL, sqlValue);
+    const sqlValue = [locationSubmitted.searchquery, locationSubmitted.formatted_query, locationSubmitted.latitude, locationSubmitted.longitude];
+    const SQL = `INSERT INTO cityLocation(
+      searchQuery, formattedQuery, latitude, longitude
+      ) VALUES (
+        $1, $2, $3, $4
+        )`;
+    client.query(SQL, sqlValue);
     response.send(locationSubmitted);
   })
 }

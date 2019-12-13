@@ -1,119 +1,129 @@
 'use strict';
 
+//DEPENDENCIES
+const PORT = process.env.PORT || 3000;
 const express = require('express');
-const app = express(); //creates a server that is an object
+const app = express();
 const cors = require('cors');
 const superagent = require('superagent');
-require('dotenv').config();
-
 app.use(cors());
-app.use(express.static('./public'));
-const PORT = process.env.PORT || 3000;
-let newLocation;
+require('dotenv').config();
+const pg = require('pg');
 
-app.get('/location', (req, res) => {
-  // let query =request.query.data;
-
-  let googleURL = `https://maps.googleapis.com/maps/api/geocode/json?address=${req.query.data}&key=${process.env.GEOCODE_API_KEY}`
-  console.log(process.env.GEOCODE_API_KEY);
-
-  superagent.get(googleURL).then(response => {
-     console.log('body', response.body);
-
-    const location = response.body.results[0].geometry.location;
-    
-    const formatedAddress = response.body.results[0].formatted_address;
-    const searchQuery = response.body.results[0].address_components[0].long_name;
-
-    newLocation = new Location(searchQuery, formatedAddress, location);
-    res.send(newLocation);
-
-  })
-
-    .catch(error => {
-      console.error(error)
-    })
-
-})
-
-// location constructor
-
-function Location(searchQuery, formatedAddress, location) {
-
-  this.searchQuery = searchQuery;
-  this.formatted_query = formatedAddress;
-  this.latitude = location['lat'];
-  this.longitude = location['lng'];
+// GLOBAL VARIABLES
+let error = {
+  status: 500,
+  responseText: 'Sorry, something went wrong',
 }
 
-// weather
+const GEOCODE_API_KEY = process.env.GEOCODE_API_KEY;
+const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
+const EVENT_API_KEY = process.env.EVENT_API_KEY;
+const DATABASE_URL = process.env.DATABASE_URL;
+let locationSubmitted;
+let query;
 
-app.get('/weather', (req, res) => {
-  let weatherURL = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${newLocation.latitude},${newLocation.longitude}`
+const client = new pg.Client(`${DATABASE_URL}`);
+client.on('error', error => console.error(error));
+client.connect();
 
-  superagent.get(weatherURL).then(response => {
 
-    const weatherArray = response.body.daily.data
-    const weatherResponse = weatherArray.map(byDay => {
-      return new Forecast(byDay.summary, byDay.time);
-      console.log(weatherResponse);
-    })
-    res.send(weatherResponse);
+// LOCATION PATH
+function getLocationData(request, response) {
+  query = request.query.data;
+  const sql = 'SELECT * FROM location WHERE searchQuery = $1';
+  client.query(sql, [query]).then(sqlResponse => {
+    if (sqlResponse.rowCount > 0) {
+      response.send(sqlResponse.rows[0]);
+    } else {
+      createDataFromAPI(request, response, query);
+    }
+  });
+}
 
+function createDataFromAPI(request, response, query) {
+  superagent.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${GEOCODE_API_KEY}`).then(geoResponse => {
+    const location = geoResponse.body.results[0].geometry.location;
+    const formAddr = geoResponse.body.results[0].formatted_address;
+    locationSubmitted = new Geolocation(query, formAddr, location.lat, location.lng);
+    const sqlValu = [locationSubmitted.searchquery, locationSubmitted.formatted_query, locationSubmitted.latitude, locationSubmitted.longitude];
+    const SQL = `INSERT INTO cityLocation(
+      searchQuery, formattedQuery, latitude, longitude
+      ) VALUES (
+        $1, $2, $3, $4
+        )`;
+    client.query(SQL, sqlValu);
+    response.send(locationSubmitted);
   })
+}
 
-    .catch(error => {
-      console.error('catch on weather ', error)
+
+// LOCATION CONSTRUCTOR FUNCTION
+function Geolocation(searchquery, formAddr, location) {
+  this.searchquery = searchquery;
+  this.formatted_query = formAddr;
+  this.latitude = location.lat;
+  this.longitude = location.lng;
+}
+
+// WEATHER PATH
+function getWeatherData(request, response) {
+  superagent.get(`https://api.darksky.net/forecast/${WEATHER_API_KEY}/${locationSubmitted.latitude},${locationSubmitted.longitude}`).then(res => {
+    const weatherArr = res.body.daily.data
+    const reply = weatherArr.map(byDay => {
+      return new Forecast(byDay.summary, byDay.time);
     })
+    response.send(reply);
+  })
+}
 
-})
-// weather constructor
 
+// FORECAST CONSTRUCTOR FUNCTION
 function Forecast(summary, time) {
   this.forecast = summary;
   this.time = (new Date(time * 1000)).toDateString();
 }
 
-// function Event(event) {
+// EVENTS PATH
 
-//     this.link = event.url;
-//     this.name = event.venue_name;
-//     this.event_date = event.start_time;
-//     this.description = event.description; 
-// }
+function getEventData(request, response) {
 
-try {
-  app.get('/events', getEvents);
-  
-} catch (error) {
-  console.error('catch on weather ', error)
+  superagent.get(`http://api.eventful.com/json/events/search?where=${locationSubmitted.latitude},${locationSubmitted.longitude}&within=25&app_key=${EVENT_API_KEY}`).then(res => {
+    let events = JSON.parse(res.text);
+    let moreEvents = events.events.event
+    let eventData = moreEvents.map(event => {
+      return new Event(event.url, event.title, event.start_time, event.description);
+    })
+    response.send(eventData);
+  }).catch(error => {
+    console.error('catch on events ', error)
+  })
+};
 
+
+
+// EVENTS CONSTRUCTOR FUNCTION
+function Event(link, name, event_date, summary = 'none') {
+  this.link = link,
+    this.name = name,
+    this.event_date = event_date,
+    this.summary = summary
 }
 
-function getEvents(req, res) {
-  console.log(req.query);
-  // go to eventful, get data and get it to look like this
-  superagent.get(`http://api.eventful.com/json/events/search?app_key=kcbDf9m2gZnd2bBR&keywords=sports&location=${req.query.data.formatted_query}&date=Future`).then(response => {
-    // console.log(JSON.parse(response.text).events.event[0]);
-    const firstEvent = JSON.parse(response.text).events.event[0];
-    const allEvents = JSON.parse(response.text).events.event;
 
-    const allData = allEvents.map(event => {
-      return {
-        'link': event.url,
-        'name': event.title,
-        'event_date': event.start_time,
-        'summary': event.description
-      };
-    });
-    console.log(allData);
+// LOCATION
+app.get('/location', getLocationData);
 
-    res.send(allData);
+// WEATHER
+app.get('/weather', getWeatherData);
 
-  });
+//EVENT
+app.get('/events', getEventData);
 
-}
 
-app.listen(PORT, function () {
-  console.log('starting!');
+
+// LISTEN
+app.listen(PORT, () => {
+  console.log(`App is on PORT: ${PORT}`);
 });
+

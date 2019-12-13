@@ -31,7 +31,7 @@ client.connect();
 // LOCATION PATH
 function getLocationData(request, response) {
   query = request.query.data;
-  const sql = 'SELECT * FROM location WHERE searchQuery = $1';
+  const sql = 'SELECT * FROM location WHERE search_query = $1';
   client.query(sql, [query]).then(sqlResponse => {
     if (sqlResponse.rowCount > 0) {
       response.send(sqlResponse.rows[0]);
@@ -50,11 +50,12 @@ function createDataFromAPI(request, response, query) {
     locationSubmitted = new Geolocation(query, formAddr, location);
     const sqlValue = [locationSubmitted.searchquery, locationSubmitted.formatted_query, locationSubmitted.latitude, locationSubmitted.longitude];
     const SQL = `INSERT INTO location(
-      searchQuery, formattedQuery, latitude, longitude
+      search_query, formatted_query, latitude, longitude
       ) VALUES (
         $1, $2, $3, $4
         )`;
     client.query(SQL, sqlValue);
+    
     response.send(locationSubmitted);
   })
 }

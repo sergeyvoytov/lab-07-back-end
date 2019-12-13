@@ -48,7 +48,7 @@ function createDataFromAPI(request, response, query) {
     const location = geoResponse.body.results[0].geometry.location;
     const formAddr = geoResponse.body.results[0].formatted_address;
     locationSubmitted = new Geolocation(query, formAddr, location);
-    const sqlValue = [locationSubmitted.searchquery, locationSubmitted.formatted_query, locationSubmitted.latitude, locationSubmitted.longitude];
+    const sqlValue = [locationSubmitted.search_query, locationSubmitted.formatted_query, locationSubmitted.latitude, locationSubmitted.longitude];
     const SQL = `INSERT INTO location(
       search_query, formatted_query, latitude, longitude
       ) VALUES (
@@ -62,8 +62,8 @@ function createDataFromAPI(request, response, query) {
 
 
 // LOCATION CONSTRUCTOR FUNCTION
-function Geolocation(searchquery, formAddr, location) {
-  this.searchquery = searchquery;
+function Geolocation(search_query, formAddr, location) {
+  this.search_query = search_query;
   this.formatted_query = formAddr;
   this.latitude = location.lat;
   this.longitude = location.lng;

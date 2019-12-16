@@ -69,7 +69,6 @@ function Geolocation(search_query, formAddr, location) {
   this.longitude = location.lng;
 }
 
-
 // WEATHER PATH
 function getWeatherData(request, response) {
   superagent.get(`https://api.darksky.net/forecast/${WEATHER_API_KEY}/${locationSubmitted.latitude},${locationSubmitted.longitude}`).then(res => {
@@ -116,9 +115,6 @@ function Event(link, name, event_date, summary = 'none') {
     this.summary = summary
 }
 
-////////////////////////////////////////
-
-
 
 // LOCATION
 app.get('/location', getLocationData);
@@ -129,43 +125,9 @@ app.get('/weather', getWeatherData);
 //EVENT
 app.get('/events', getEventData);
 
-// MOVIES
-// app.get('/movie', getMovie);
-
-
-
-// function Movie(movieData) {
-
-//   this.title = movieData.title;
-//   this.overview = movieData.overview;
-//   this.average_votes = movieData.vote_average;
-//   this.total_votes = movieData.vote_count;
-//   this.image_url = 'https://image.tmdb.org/t/p/w500' + movieData.poster_path;
-//   this.popularity = movieData.popularity;
-//   this.released_on = movieData.relase_date;
-// }
-
-// function getMovie(request, response) {
-
-//   const getCityName = `${request.query.data.formatted_query}`.split(',')[0];
-
-//   const link = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&language=en-US&query=${getCityName}&page=1&include_adult=false`;
-
-//   superagent.get(link).then(dataFromEndpoint => {
-
-//     let movieArray = dataFromEndpoint.body.results;
-
-//     let movieDataToServer = movieArray.map(movieData => new Movie(movieData));
-
-//     response.send(movieDataToServer);
-//   });
-// }
-
-
 
 
 // LISTEN
 app.listen(PORT, () => {
   console.log(`App is on PORT: ${PORT}`);
 });
-

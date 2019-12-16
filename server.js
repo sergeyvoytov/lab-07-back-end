@@ -69,25 +69,25 @@ function Geolocation(search_query, formAddr, location) {
   this.longitude = location.lng;
 }
 
-// WEATHER PATH
-function getWeatherData(request, response) {
-  superagent.get(`https://api.darksky.net/forecast/${WEATHER_API_KEY}/${locationSubmitted.latitude},${locationSubmitted.longitude}`).then(res => {
-    const weatherArr = res.body.daily.data
-    const reply = weatherArr.map(byDay => {
-      return new Forecast(byDay.summary, byDay.time);
-    })
-    response.send(reply);
-  }).catch(error => {
-    console.error('catch on door handle', error)
-}
-  )}
+// // WEATHER PATH
+// function getWeatherData(request, response) {
+//   superagent.get(`https://api.darksky.net/forecast/${WEATHER_API_KEY}/${locationSubmitted.latitude},${locationSubmitted.longitude}`).then(res => {
+//     const weatherArr = res.body.daily.data
+//     const reply = weatherArr.map(byDay => {
+//       return new Forecast(byDay.summary, byDay.time);
+//     })
+//     response.send(reply);
+//   }).catch(error => {
+//     console.error('catch on door handle', error)
+// }
+//   )}
 
 
-// FORECAST CONSTRUCTOR FUNCTION
-function Forecast(summary, time) {
-  this.forecast = summary;
-  this.time = (new Date(time * 1000)).toDateString();
-}
+// // FORECAST CONSTRUCTOR FUNCTION
+// function Forecast(summary, time) {
+//   this.forecast = summary;
+//   this.time = (new Date(time * 1000)).toDateString();
+// }
 
 // EVENTS PATH
 

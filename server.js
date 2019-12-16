@@ -118,31 +118,6 @@ function Event(link, name, event_date, summary = 'none') {
 
 ////////////////////////////////////////
 
-function getMovieData(request, response) {
-
-  superagent.get(`http://api.eventful.com/json/events/search?where=${locationSubmitted.latitude},${locationSubmitted.longitude}&within=25&app_key=${EVENT_API_KEY}`).then(res => {
-    let events = JSON.parse(res.text);
-    let moreEvents = events.events.event
-    let eventData = moreEvents.map(event => {
-      return new Event(event.url, event.title, event.start_time, event.description);
-    })
-    response.send(eventData);
-  }).catch(error => {
-    console.error('catch on events ', error)
-  })
-};
-
-
-
-// EVENTS CONSTRUCTOR FUNCTION
-function Event(link, name, event_date, summary = 'none') {
-  this.link = link,
-    this.name = name,
-    this.event_date = event_date,
-    this.summary = summary
-}
-
-
 
 
 // LOCATION

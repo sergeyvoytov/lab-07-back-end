@@ -155,36 +155,36 @@ app.get('/weather', getWeatherData);
 app.get('/events', getEventData);
 
 // MOVIES
-app.get('/movies', getMovie);
+// app.get('/movie', getMovie);
 
 
 
-function Movie(movieData) {
+// function Movie(movieData) {
 
-  this.title = movieData.title;
-  this.overview = movieData.overview;
-  this.average_votes = movieData.vote_average;
-  this.total_votes = movieData.vote_count;
-  this.image_url = 'https://image.tmdb.org/t/p/w500' + movieData.poster_path;
-  this.popularity = movieData.popularity;
-  this.released_on = movieData.relase_date;
-}
+//   this.title = movieData.title;
+//   this.overview = movieData.overview;
+//   this.average_votes = movieData.vote_average;
+//   this.total_votes = movieData.vote_count;
+//   this.image_url = 'https://image.tmdb.org/t/p/w500' + movieData.poster_path;
+//   this.popularity = movieData.popularity;
+//   this.released_on = movieData.relase_date;
+// }
 
-function getMovie(request, response) {
+// function getMovie(request, response) {
 
-  const getCityName = `${request.query.data.formatted_query}`.split(',')[0];
+//   const getCityName = `${request.query.data.formatted_query}`.split(',')[0];
 
-  const link = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&language=en-US&query=${getCityName}&page=1&include_adult=false`;
+//   const link = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&language=en-US&query=${getCityName}&page=1&include_adult=false`;
 
-  superagent.get(link).then(dataFromEndpoint => {
+//   superagent.get(link).then(dataFromEndpoint => {
 
-    let movieArray = dataFromEndpoint.body.results;
+//     let movieArray = dataFromEndpoint.body.results;
 
-    let movieDataToServer = movieArray.map(movieData => new Movie(movieData));
+//     let movieDataToServer = movieArray.map(movieData => new Movie(movieData));
 
-    response.send(movieDataToServer);
-  });
-}
+//     response.send(movieDataToServer);
+//   });
+// }
 
 
 

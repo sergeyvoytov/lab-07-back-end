@@ -69,6 +69,7 @@ function Geolocation(search_query, formAddr, location) {
   this.longitude = location.lng;
 }
 
+
 // WEATHER PATH
 function getWeatherData(request, response) {
   superagent.get(`https://api.darksky.net/forecast/${WEATHER_API_KEY}/${locationSubmitted.latitude},${locationSubmitted.longitude}`).then(res => {
@@ -115,6 +116,34 @@ function Event(link, name, event_date, summary = 'none') {
     this.summary = summary
 }
 
+////////////////////////////////////////
+
+function getMovieData(request, response) {
+
+  superagent.get(`http://api.eventful.com/json/events/search?where=${locationSubmitted.latitude},${locationSubmitted.longitude}&within=25&app_key=${EVENT_API_KEY}`).then(res => {
+    let events = JSON.parse(res.text);
+    let moreEvents = events.events.event
+    let eventData = moreEvents.map(event => {
+      return new Event(event.url, event.title, event.start_time, event.description);
+    })
+    response.send(eventData);
+  }).catch(error => {
+    console.error('catch on events ', error)
+  })
+};
+
+
+
+// EVENTS CONSTRUCTOR FUNCTION
+function Event(link, name, event_date, summary = 'none') {
+  this.link = link,
+    this.name = name,
+    this.event_date = event_date,
+    this.summary = summary
+}
+
+
+
 
 // LOCATION
 app.get('/location', getLocationData);
@@ -124,6 +153,39 @@ app.get('/weather', getWeatherData);
 
 //EVENT
 app.get('/events', getEventData);
+
+// MOVIES
+app.get('/movies', getMovie);
+
+
+
+function Movie(movieData) {
+
+  this.title = movieData.title;
+  this.overview = movieData.overview;
+  this.average_votes = movieData.vote_average;
+  this.total_votes = movieData.vote_count;
+  this.image_url = 'https://image.tmdb.org/t/p/w500' + movieData.poster_path;
+  this.popularity = movieData.popularity;
+  this.released_on = movieData.relase_date;
+}
+
+function getMovie(request, response) {
+
+  const getCityName = `${request.query.data.formatted_query}`.split(',')[0];
+
+  const link = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&language=en-US&query=${getCityName}&page=1&include_adult=false`;
+
+  superagent.get(link).then(dataFromEndpoint => {
+
+    let movieArray = dataFromEndpoint.body.results;
+
+    let movieDataToServer = movieArray.map(movieData => new Movie(movieData));
+
+    response.send(movieDataToServer);
+  });
+}
+
 
 
 

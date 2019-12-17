@@ -48,6 +48,8 @@ function createDataFromAPI(request, response, query) {
     const location = geoResponse.body.results[0].geometry.location;
     const formAddr = geoResponse.body.results[0].formatted_address;
     locationSubmitted = new Geolocation(query, formAddr, location);
+
+    
     const sqlValue = [locationSubmitted.search_query, locationSubmitted.formatted_query, locationSubmitted.latitude, locationSubmitted.longitude];
     const SQL = `INSERT INTO location(
       search_query, formatted_query, latitude, longitude
@@ -55,8 +57,9 @@ function createDataFromAPI(request, response, query) {
         $1, $2, $3, $4
         )`;
     client.query(SQL, sqlValue);
-    
+
     response.send(locationSubmitted);
+
   })
 }
 
@@ -71,7 +74,10 @@ function Geolocation(search_query, formAddr, location) {
 
 // WEATHER PATH
 function getWeatherData(request, response) {
-  superagent.get(`https://api.darksky.net/forecast/${WEATHER_API_KEY}/${locationSubmitted.latitude},${locationSubmitted.longitude}`).then(res => {
+  console.log('query',request.query)
+  superagent.get(`https://api.darksky.net/forecast/${WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`).then(res => {
+    console.log('WEATHER_API_KEY' +WEATHER_API_KEY)
+
     const weatherArr = res.body.daily.data
     const reply = weatherArr.map(byDay => {
       return new Forecast(byDay.summary, byDay.time);
@@ -79,8 +85,9 @@ function getWeatherData(request, response) {
     response.send(reply);
   }).catch(error => {
     console.error('catch on door handle', error)
+  }
+  )
 }
-  )}
 
 
 // FORECAST CONSTRUCTOR FUNCTION
@@ -93,7 +100,7 @@ function Forecast(summary, time) {
 
 function getEventData(request, response) {
 
-  superagent.get(`http://api.eventful.com/json/events/search?where=${locationSubmitted.latitude},${locationSubmitted.longitude}&within=25&app_key=${EVENT_API_KEY}`).then(res => {
+  superagent.get(`http://api.eventful.com/json/events/search?where=${request.query.data.latitude},${request.query.data.longitude}&within=25&app_key=${EVENT_API_KEY}`).then(res => {
     let events = JSON.parse(res.text);
     let moreEvents = events.events.event
     let eventData = moreEvents.map(event => {

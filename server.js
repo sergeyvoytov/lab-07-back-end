@@ -10,6 +10,9 @@ app.use(cors());
 require('dotenv').config();
 const pg = require('pg');
 
+const yelp = require('./modules/yelp');
+
+
 // GLOBAL VARIABLES
 let error = {
   status: 500,
@@ -132,6 +135,9 @@ app.get('/weather', getWeatherData);
 //EVENT
 app.get('/events', getEventData);
 
+
+//YELP
+app.get('/yelp', yelp.yelp);
 
 
 // LISTEN

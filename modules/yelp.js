@@ -1,3 +1,8 @@
+ 
+'use strict';
+
+const superagent = require('superagent');
+
 function yelp(yelpData) {
   this.name = yelpData.name;
   this.image_url = yelpData.image_url;
@@ -17,8 +22,7 @@ function getInfo(req, res) {
     const restaurantData = restaurantArray.map(yelpData => new yelp(yelpData));
     response.status(200).send(restaurantData);
 
-    app.get('/yelp', renderMovies);
-
   });
 };
 
+exports.yelp = yelp;

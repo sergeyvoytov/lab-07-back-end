@@ -1,4 +1,4 @@
- 
+
 'use strict';
 
 const superagent = require('superagent');
@@ -10,9 +10,9 @@ function yelp(yelpData) {
   this.rating = yelpData.rating;
   this.url = yelpData.url;
 }
-const yelpUrl = `https://api.yelp.com/v3/businesses/search?term="restaurants"&location="${request.query.data.formatted_query}"`;
 
 function getInfo(req, res) {
+  const yelpUrl = `https://api.yelp.com/v3/businesses/search?term="restaurants"&location="${request.query.data.formatted_query}"`;
 
 
   superagent.get(yelpUrl).set('Authorization', `BEARER ${process.env.YELP_API_KEY}`).then(data => {

@@ -9,8 +9,8 @@ const superagent = require('superagent');
 app.use(cors());
 require('dotenv').config();
 const pg = require('pg');
-
 const yelp = require('./modules/yelp');
+
 
 
 // GLOBAL VARIABLES
@@ -45,13 +45,13 @@ function getLocationData(request, response) {
 }
 
 function createDataFromAPI(request, response, query) {
-
-
+  
+  
   superagent.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${GEOCODE_API_KEY}`).then(geoResponse => {
     const location = geoResponse.body.results[0].geometry.location;
     const formAddr = geoResponse.body.results[0].formatted_address;
     locationSubmitted = new Geolocation(query, formAddr, location);
-
+    
     
     const sqlValue = [locationSubmitted.search_query, locationSubmitted.formatted_query, locationSubmitted.latitude, locationSubmitted.longitude];
     const SQL = `INSERT INTO location(
@@ -59,10 +59,10 @@ function createDataFromAPI(request, response, query) {
       ) VALUES (
         $1, $2, $3, $4
         )`;
-    client.query(SQL, sqlValue);
-
-    response.send(locationSubmitted);
-
+        client.query(SQL, sqlValue);
+        
+        response.send(locationSubmitted);
+        
   })
 }
 
@@ -80,7 +80,7 @@ function getWeatherData(request, response) {
   console.log('query',request.query)
   superagent.get(`https://api.darksky.net/forecast/${WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`).then(res => {
     console.log('WEATHER_API_KEY' +WEATHER_API_KEY)
-
+    
     const weatherArr = res.body.daily.data
     const reply = weatherArr.map(byDay => {
       return new Forecast(byDay.summary, byDay.time);
@@ -120,9 +120,9 @@ function getEventData(request, response) {
 // EVENTS CONSTRUCTOR FUNCTION
 function Event(link, name, event_date, summary = 'none') {
   this.link = link,
-    this.name = name,
-    this.event_date = event_date,
-    this.summary = summary
+  this.name = name,
+  this.event_date = event_date,
+  this.summary = summary
 }
 
 
